@@ -28,6 +28,11 @@ All GitHub Actions workflows have been updated to use **Java 21** instead of Jav
 - SNAPSHOT versions are not available in public Maven repositories
 - The stable release version will prevent build failures in GitHub Actions
 
+**GitHub Actions Permissions Fixed**
+- Added `permissions: contents: write` to the workflow
+- This allows the auto-release job to create and update tags/releases
+- Fixes the "Resource not accessible by integration" error
+
 ## Testing
 
 The workflows will now:
