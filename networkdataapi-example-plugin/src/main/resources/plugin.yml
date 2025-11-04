@@ -1,0 +1,26 @@
+name: NetworkDataAPI-Example
+version: ${project.version}
+main: com.astroid.stijnjakobs.networkdataapi.example.ExamplePlugin
+api-version: 1.20
+author: Stijn Jakobs
+description: Example plugin demonstrating NetworkDataAPI usage with custom MongoDB collections
+
+# NetworkDataAPI must be loaded first
+depend:
+  - NetworkDataAPI
+
+commands:
+  example:
+    description: Example plugin commands
+    usage: /<command> [insert|query|update|delete|stats]
+    aliases: [ex, expl]
+    permission: networkdataapi.example.use
+    permission-message: You don't have permission to use this command
+
+permissions:
+  networkdataapi.example.use:
+    description: Allows use of example plugin commands
+    default: op
+  networkdataapi.example.admin:
+    description: Allows administrative operations
+    default: op

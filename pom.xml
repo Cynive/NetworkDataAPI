@@ -41,6 +41,7 @@
         <module>networkdataapi-core</module>
         <module>networkdataapi-paper</module>
         <module>networkdataapi-bungee</module>
+        <module>networkdataapi-example-plugin</module>
     </modules>
 
     <properties>
