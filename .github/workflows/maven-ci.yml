@@ -1,0 +1,68 @@
+name: Maven CI
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+
+jobs:
+  build:
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        java: [17, 21]
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up JDK ${{ matrix.java }}
+      uses: actions/setup-java@v4
+      with:
+        java-version: ${{ matrix.java }}
+        distribution: 'temurin'
+        cache: maven
+
+    - name: Cache Maven packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+
+    - name: Build with Maven
+      run: mvn -B clean package --file pom.xml
+
+    - name: Run tests
+      run: mvn -B test --file pom.xml
+      continue-on-error: true
+
+    - name: Generate test report
+      if: always()
+      run: mvn surefire-report:report-only
+      continue-on-error: true
+
+    - name: Archive build artifacts
+      if: matrix.os == 'ubuntu-latest' && matrix.java == '17'
+      uses: actions/upload-artifact@v4
+      with:
+        name: jars-java-${{ matrix.java }}
+        path: |
+          networkdataapi-paper/target/*.jar
+          networkdataapi-bungee/target/*.jar
+        retention-days: 7
+
+    - name: Archive test results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-results-${{ matrix.os }}-java-${{ matrix.java }}
+        path: |
+          **/target/surefire-reports/
+          **/target/site/
+        retention-days: 7
+

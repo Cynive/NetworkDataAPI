@@ -1,0 +1,25 @@
+name: NetworkDataAPI
+version: ${project.version}
+main: com.astroid.stijnjakobs.networkdataapi.paper.NetworkDataAPI
+api-version: '1.20'
+authors:
+  - Stijn Jakobs
+description: Enterprise-level data synchronization plugin for Minecraft networks
+website: https://github.com/astroid/NetworkDataAPI
+load: STARTUP
+
+commands:
+  networkdataapi:
+    description: Main NetworkDataAPI command
+    usage: /networkdataapi <status|reload|cache>
+    aliases: [ndapi, napi]
+    permission: networkdataapi.admin
+
+permissions:
+  networkdataapi.admin:
+    description: Access to all NetworkDataAPI commands
+    default: op
+  networkdataapi.api:
+    description: Allows other plugins to use the API
+    default: true
+
