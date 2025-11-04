@@ -159,21 +159,37 @@ jobs:
       id: commit_count
       run: echo "COUNT=$(git rev-list --count HEAD)" >> $GITHUB_OUTPUT
 
-    - name: Delete existing latest release
-      continue-on-error: true
-      run: |
-        gh release delete latest --yes --cleanup-tag
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Get short SHA
+      id: sha
+      run: echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
-    - name: Create latest release
+    - name: Create development release
       id: create_release
       uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: latest
-        release_name: "Development Build (${{ steps.date.outputs.DATE }}-${{ steps.commit_count.outputs.COUNT }})"
+        tag_name: dev-${{ steps.date.outputs.DATE }}-build${{ steps.commit_count.outputs.COUNT }}
+        release_name: "Development Build v${{ steps.date.outputs.DATE }}-build${{ steps.commit_count.outputs.COUNT }}"
+        body: |
+          ## 🚧 Development Build
+          
+          **Version:** ${{ steps.date.outputs.DATE }}-build${{ steps.commit_count.outputs.COUNT }}
+          **Commit:** ${{ steps.sha.outputs.SHORT_SHA }}
+          **Branch:** ${{ github.ref_name }}
+          
+          ### 📦 Downloads
+          - **Paper/Spigot**: NetworkDataAPI-Paper-${{ steps.date.outputs.DATE }}-${{ steps.commit_count.outputs.COUNT }}.jar
+          - **BungeeCord**: NetworkDataAPI-Bungee-${{ steps.date.outputs.DATE }}-${{ steps.commit_count.outputs.COUNT }}.jar
+          
+          ### ⚠️ Note
+          This is an automated development build. For stable releases, use tagged versions.
+          
+          ### 🚀 Installation
+          1. Download the appropriate JAR for your server type
+          2. Place in `plugins/` folder
+          3. Configure MongoDB in `plugins/NetworkDataAPI/config.yml`
+          4. Restart server
         draft: false
         prerelease: true
 
