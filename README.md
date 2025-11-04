@@ -230,6 +230,38 @@ Document guild = guilds.find(Filters.eq("name", "Warriors")).first();
 - ✅ Automatic reconnection
 - ✅ Less resource usage
 
+### 📦 Example Plugin
+
+**Want to see a complete working example?**
+
+Check out the [networkdataapi-example-plugin](networkdataapi-example-plugin/) module!
+
+This example plugin demonstrates:
+- ✅ Creating an isolated MongoDB database
+- ✅ Managing custom collections
+- ✅ Insert, query, update, and delete operations
+- ✅ Creating indexes for performance
+- ✅ Comprehensive logging for debugging
+- ✅ In-game commands for testing
+
+**Quick Start:**
+```bash
+# See the example plugin guide
+cat EXAMPLE_PLUGIN_GUIDE.md
+
+# Or jump straight to the code
+cd networkdataapi-example-plugin/src/main/java
+```
+
+**Key Features:**
+- Full CRUD operations on custom collections
+- Dedicated database per plugin (`example_plugin`)
+- Sample collection (`example_collection`)
+- 8 in-game commands to test all operations
+- Production-ready code with best practices
+
+See [EXAMPLE_PLUGIN_GUIDE.md](EXAMPLE_PLUGIN_GUIDE.md) for full details!
+
 ### More Examples
 
 **Save complete player data:**
@@ -283,8 +315,14 @@ NetworkDataAPI-parent/
 ├── networkdataapi-paper/         # Paper/Spigot implementation
 │   └── Paper-specific hooks
 │
-└── networkdataapi-bungee/        # BungeeCord implementation
-    └── BungeeCord-specific hooks
+├── networkdataapi-bungee/        # BungeeCord implementation
+│   └── BungeeCord-specific hooks
+│
+└── networkdataapi-example-plugin/ # Example plugin (NEW!)
+    ├── ExamplePlugin.java        # Main plugin class
+    ├── ExampleDataManager.java   # MongoDB operations
+    ├── ExampleCommand.java       # In-game commands
+    └── README.md                 # Complete documentation
 ```
 
 ## ⚙️ Configuration
