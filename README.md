@@ -105,7 +105,46 @@ Build artifacts will be located at:
 
 ## 📖 For Plugin Developers
 
-### Add Dependency
+### Option 1: Use as a Library (Maven/Gradle)
+
+Add the NetworkDataAPI Core library to your plugin's dependencies:
+
+#### Maven
+```xml
+<dependencies>
+    <dependency>
+        <groupId>com.astroid.stijnjakobs</groupId>
+        <artifactId>networkdataapi-core</artifactId>
+        <version>1.0-SNAPSHOT</version>
+        <scope>provided</scope>
+    </dependency>
+</dependencies>
+
+<!-- Add AstroidMC Maven Repository -->
+<repositories>
+    <repository>
+        <id>astroidmc-public</id>
+        <url>https://maven.astroidmc.com/repository/maven-public/</url>
+    </repository>
+</repositories>
+```
+
+#### Gradle
+```gradle
+repositories {
+    maven {
+        url = uri("https://maven.astroidmc.com/repository/maven-public/")
+    }
+}
+
+dependencies {
+    compileOnly 'com.astroid.stijnjakobs:networkdataapi-core:1.0-SNAPSHOT'
+}
+```
+
+**Note:** Use `scope: provided` (Maven) or `compileOnly` (Gradle) because the NetworkDataAPI plugin provides the library at runtime!
+
+### Option 2: Plugin Dependency
 
 **plugin.yml (Paper/Spigot):**
 ```yaml

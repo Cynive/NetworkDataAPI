@@ -11,6 +11,31 @@
 
     <name>NetworkDataAPI Parent</name>
     <description>Enterprise-level data synchronization plugin for Minecraft networks</description>
+    <url>https://github.com/AstroidMC/NetworkDataAPI</url>
+
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>https://opensource.org/licenses/MIT</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <id>stijnjakobs</id>
+            <name>Stijn Jakobs</name>
+            <email>stijn@astroidmc.com</email>
+            <organization>AstroidMC</organization>
+            <organizationUrl>https://astroidmc.com</organizationUrl>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git://github.com/AstroidMC/NetworkDataAPI.git</connection>
+        <developerConnection>scm:git:ssh://github.com:AstroidMC/NetworkDataAPI.git</developerConnection>
+        <url>https://github.com/AstroidMC/NetworkDataAPI/tree/main</url>
+    </scm>
 
     <modules>
         <module>networkdataapi-core</module>
@@ -152,4 +177,6 @@
             <url>https://maven.astroidmc.com/repository/maven-snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
+
 </project>
+
