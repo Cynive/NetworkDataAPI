@@ -14,6 +14,10 @@ on:
 
 permissions:
   contents: write
+  packages: write
+  issues: read
+  pull-requests: read
+  actions: read
 
 jobs:
   build:
@@ -155,14 +159,65 @@ jobs:
       id: commit_count
       run: echo "COUNT=$(git rev-list --count HEAD)" >> $GITHUB_OUTPUT
 
-    - name: Create automatic release
-      uses: marvinpinto/action-automatic-releases@latest
+    - name: Delete existing latest release
+      continue-on-error: true
+      run: |
+        gh release delete latest --yes --cleanup-tag
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Create latest release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
-        automatic_release_tag: "latest"
+        tag_name: latest
+        release_name: "Development Build (${{ steps.date.outputs.DATE }}-${{ steps.commit_count.outputs.COUNT }})"
+        draft: false
         prerelease: true
-        title: "Development Build (${{ steps.date.outputs.DATE }}-${{ steps.commit_count.outputs.COUNT }})"
-        files: |
-          networkdataapi-paper/target/NetworkDataAPI-Paper-*.jar
-          networkdataapi-bungee/target/NetworkDataAPI-Bungee-*.jar
+
+    - name: Find Paper JAR
+      id: find_paper
+      run: |
+        PAPER_JAR=$(find networkdataapi-paper/target -name 'NetworkDataAPI-Paper-*.jar' -type f | head -n 1)
+        if [ -n "$PAPER_JAR" ]; then
+          echo "PAPER_JAR_PATH=$PAPER_JAR" >> $GITHUB_OUTPUT
+          echo "PAPER_JAR_FOUND=true" >> $GITHUB_OUTPUT
+        else
+          echo "PAPER_JAR_FOUND=false" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Find Bungee JAR
+      id: find_bungee
+      run: |
+        BUNGEE_JAR=$(find networkdataapi-bungee/target -name 'NetworkDataAPI-Bungee-*.jar' -type f | head -n 1)
+        if [ -n "$BUNGEE_JAR" ]; then
+          echo "BUNGEE_JAR_PATH=$BUNGEE_JAR" >> $GITHUB_OUTPUT
+          echo "BUNGEE_JAR_FOUND=true" >> $GITHUB_OUTPUT
+        else
+          echo "BUNGEE_JAR_FOUND=false" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Upload Paper Release Asset
+      if: steps.find_paper.outputs.PAPER_JAR_FOUND == 'true'
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ${{ steps.find_paper.outputs.PAPER_JAR_PATH }}
+        asset_name: NetworkDataAPI-Paper-${{ steps.date.outputs.DATE }}-${{ steps.commit_count.outputs.COUNT }}.jar
+        asset_content_type: application/java-archive
+
+    - name: Upload Bungee Release Asset
+      if: steps.find_bungee.outputs.BUNGEE_JAR_FOUND == 'true'
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ${{ steps.find_bungee.outputs.BUNGEE_JAR_PATH }}
+        asset_name: NetworkDataAPI-Bungee-${{ steps.date.outputs.DATE }}-${{ steps.commit_count.outputs.COUNT }}.jar
+        asset_content_type: application/java-archive
 
