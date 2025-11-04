@@ -1,3 +1,96 @@
+name: Build and Release
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    tags:
+      - 'v*'
+  pull_request:
+    branches:
+      - main
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        cache: maven
+
+    - name: Build with Maven
+      run: mvn clean package -DskipTests
+
+    - name: Run tests
+      run: mvn test
+      continue-on-error: true
+
+    - name: Upload Paper JAR
+      uses: actions/upload-artifact@v4
+      with:
+        name: NetworkDataAPI-Paper
+        path: networkdataapi-paper/target/NetworkDataAPI-Paper-*.jar
+
+    - name: Upload Bungee JAR
+      uses: actions/upload-artifact@v4
+      with:
+        name: NetworkDataAPI-Bungee
+        path: networkdataapi-bungee/target/NetworkDataAPI-Bungee-*.jar
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        cache: maven
+
+    - name: Build with Maven
+      run: mvn clean package -DskipTests
+
+    - name: Get version from tag
+      id: get_version
+      run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ steps.get_version.outputs.VERSION }}
+        body: |
+          ## NetworkDataAPI ${{ steps.get_version.outputs.VERSION }}
+
+          ### 📦 Downloads
+          - **Paper/Spigot**: NetworkDataAPI-Paper-${{ steps.get_version.outputs.VERSION }}.jar
+          - **BungeeCord**: NetworkDataAPI-Bungee-${{ steps.get_version.outputs.VERSION }}.jar
+
+          ### 🚀 Installation
+          1. Download the appropriate JAR for your server type
+          2. Place in `plugins/` folder
+          3. Configure MongoDB in `plugins/NetworkDataAPI/config.yml`
+          4. Restart server
+
+          ### 📚 Documentation
           - [API Documentation](https://github.com/${{ github.repository }}/blob/main/API_DOCUMENTATION.md)
           - [Quick Start Guide](https://github.com/${{ github.repository }}/blob/main/QUICK_START.md)
           
@@ -41,10 +134,10 @@
       with:
         fetch-depth: 0
 
-    - name: Set up JDK 17
+    - name: Set up JDK 21
       uses: actions/setup-java@v4
       with:
-        java-version: '17'
+        java-version: '21'
         distribution: 'temurin'
         cache: maven
 
@@ -69,97 +162,4 @@
         files: |
           networkdataapi-paper/target/NetworkDataAPI-Paper-*.jar
           networkdataapi-bungee/target/NetworkDataAPI-Bungee-*.jar
-name: Build and Release
-
-on:
-  push:
-    branches:
-      - main
-      - master
-    tags:
-      - 'v*'
-  pull_request:
-    branches:
-      - main
-      - master
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Set up JDK 17
-      uses: actions/setup-java@v4
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-        cache: maven
-
-    - name: Build with Maven
-      run: mvn clean package -DskipTests
-
-    - name: Run tests
-      run: mvn test
-      continue-on-error: true
-
-    - name: Upload Paper JAR
-      uses: actions/upload-artifact@v4
-      with:
-        name: NetworkDataAPI-Paper
-        path: networkdataapi-paper/target/NetworkDataAPI-Paper-*.jar
-
-    - name: Upload Bungee JAR
-      uses: actions/upload-artifact@v4
-      with:
-        name: NetworkDataAPI-Bungee
-        path: networkdataapi-bungee/target/NetworkDataAPI-Bungee-*.jar
-
-  release:
-    needs: build
-    runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/v')
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Set up JDK 17
-      uses: actions/setup-java@v4
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-        cache: maven
-
-    - name: Build with Maven
-      run: mvn clean package -DskipTests
-
-    - name: Get version from tag
-      id: get_version
-      run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
-
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ steps.get_version.outputs.VERSION }}
-        body: |
-          ## NetworkDataAPI ${{ steps.get_version.outputs.VERSION }}
-          
-          ### 📦 Downloads
-          - **Paper/Spigot**: NetworkDataAPI-Paper-${{ steps.get_version.outputs.VERSION }}.jar
-          - **BungeeCord**: NetworkDataAPI-Bungee-${{ steps.get_version.outputs.VERSION }}.jar
-          
-          ### 🚀 Installation
-          1. Download the appropriate JAR for your server type
-          2. Place in `plugins/` folder
-          3. Configure MongoDB in `plugins/NetworkDataAPI/config.yml`
-          4. Restart server
-          
-          ### 📚 Documentation
 

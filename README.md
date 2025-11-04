@@ -120,12 +120,12 @@ Add the NetworkDataAPI Core library to your plugin's dependencies:
 </repositories>
 
 <dependencies>
-<dependency>
-   <groupId>com.astroid.stijnjakobs</groupId>
-   <artifactId>networkdataapi-core</artifactId>
-   <version>1.0-SNAPSHOT</version>
-   <scope>provided</scope>
-</dependency>
+   <dependency>
+      <groupId>com.astroid.stijnjakobs</groupId>
+      <artifactId>networkdataapi-core</artifactId>
+      <version>1.0-SNAPSHOT</version>
+      <scope>provided</scope>
+   </dependency>
 </dependencies>
 ```
 
