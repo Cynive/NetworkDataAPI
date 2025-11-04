@@ -84,9 +84,44 @@ public interface NetworkDataAPIProvider {
      *   <li>Full MongoDB API access</li>
      * </ul>
      *
-     * @return the MongoDB database instance
+     * @return the MongoDB database instance (default database from config)
      */
     MongoDatabase getDatabase();
+
+    /**
+     * Gets access to a custom MongoDB database using the shared connection.
+     *
+     * <p>This allows plugins to create and use their own separate databases
+     * while still using the shared connection pool provided by NetworkDataAPI.</p>
+     *
+     * <p><strong>Example - Plugin with its own database:</strong></p>
+     * <pre>{@code
+     * // Each plugin can have its own database
+     * MongoDatabase cosmeticsDB = api.getDatabase("cosmetics_plugin");
+     * MongoDatabase guildsDB = api.getDatabase("guilds_plugin");
+     * MongoDatabase punishmentsDB = api.getDatabase("punishments_plugin");
+     *
+     * // Use your own database
+     * MongoCollection<Document> items = cosmeticsDB.getCollection("items");
+     * items.insertOne(new Document("name", "Crown").append("price", 5000));
+     * }</pre>
+     *
+     * <p><strong>Benefits:</strong></p>
+     * <ul>
+     *   <li>Complete database isolation per plugin</li>
+     *   <li>No conflicts with other plugins</li>
+     *   <li>Uses the shared connection pool (efficient)</li>
+     *   <li>Automatic connection management and retries</li>
+     *   <li>Full MongoDB API access</li>
+     * </ul>
+     *
+     * <p><strong>Note:</strong> The database will be created automatically when
+     * you first write data to it. No manual creation needed.</p>
+     *
+     * @param databaseName the name of the database to access
+     * @return the MongoDB database instance
+     */
+    MongoDatabase getDatabase(String databaseName);
 
     /**
      * Gets the current version of NetworkDataAPI.

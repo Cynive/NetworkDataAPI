@@ -390,7 +390,7 @@ import org.bson.Document;
 // Get direct access to the shared database connection
 MongoDatabase database = api.getDatabase();
 
-// Create your own collection (bijvoorbeeld voor cosmetics)
+// Create your own collection (for example for cosmetics)
 MongoCollection<Document> cosmetics = database.getCollection("cosmetics");
 
 // Perform operations on your custom collection
@@ -415,16 +415,290 @@ Document playerCosmeticData = new Document("_id", playerUUID.toString())
 playerCosmetics.insertOne(playerCosmeticData);
 ```
 
-**Voordelen van deze aanpak:**
-- ✅ **Geen eigen database connectie** nodig in je plugin
-- ✅ **Gebruikt de gedeelde connection pool** (max 100 connections)
-- ✅ **Automatische reconnection** en error handling
-- ✅ **Minder resource usage** - alle plugins delen dezelfde pool
-- ✅ **Eenvoudige setup** - één regel code: `api.getDatabase()`
-- ✅ **Volledige MongoDB API** - alle operations beschikbaar
+**Benefits of this approach:**
+- ✅ **No separate database connection** needed in your plugin
+- ✅ **Uses the shared connection pool** (max 100 connections)
+- ✅ **Automatic reconnection** and error handling
+- ✅ **Less resource usage** - all plugins share the same pool
+- ✅ **Simple setup** - one line of code: `api.getDatabase()`
+- ✅ **Full MongoDB API** - all operations available
 
-**Complete voorbeeld voor een Cosmetics Plugin:**
-Zie `COSMETICS_PLUGIN_EXAMPLE.java` in de repository voor een volledig werkend voorbeeld!
+### Custom Databases per Plugin
+
+**New in v1.0!** Each plugin can now have its **own MongoDB database** for **complete isolation**:
+
+```java
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.MongoCollection;
+import org.bson.Document;
+
+// Each plugin gets its own database
+MongoDatabase cosmeticsDB = api.getDatabase("cosmetics_plugin");
+MongoDatabase guildsDB = api.getDatabase("guilds_plugin");
+MongoDatabase punishmentsDB = api.getDatabase("punishments_plugin");
+
+// Work with your own database - 100% isolated!
+MongoCollection<Document> items = cosmeticsDB.getCollection("items");
+MongoCollection<Document> purchases = cosmeticsDB.getCollection("purchases");
+
+// No conflicts with other plugins possible!
+items.insertOne(new Document("name", "Crown").append("price", 5000));
+```
+
+**When to use a separate database?**
+- ✅ **Large plugins** with lots of data (1M+ documents)
+- ✅ **Complete isolation** from other plugins
+- ✅ **Own backup schema** per plugin
+- ✅ **Different replication settings**
+- ✅ **Easier data management** and migrations
+- ✅ **Separate monitoring** per plugin
+
+**When to use the same database with separate collections?**
+- ✅ **Small to medium-sized plugins**
+- ✅ **Cross-plugin queries** needed
+- ✅ **Simpler setup**
+
+**Complete example: Cosmetics Plugin with its own database**
+
+```java
+import com.astroid.stijnjakobs.networkdataapi.core.api.APIRegistry;
+import com.astroid.stijnjakobs.networkdataapi.core.api.NetworkDataAPIProvider;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.UpdateOptions;
+import com.mongodb.client.model.Updates;
+import org.bson.Document;
+import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
+
+public class CosmeticsPlugin extends JavaPlugin {
+    
+    private NetworkDataAPIProvider api;
+    private MongoDatabase database;
+    private MongoCollection<Document> itemsCollection;
+    private MongoCollection<Document> playerCosmeticsCollection;
+    
+    @Override
+    public void onEnable() {
+        // Hook into NetworkDataAPI
+        api = APIRegistry.getAPI();
+        
+        // Get your own dedicated database
+        database = api.getDatabase("cosmetics_plugin");
+        
+        // Initialize collections
+        itemsCollection = database.getCollection("items");
+        playerCosmeticsCollection = database.getCollection("player_cosmetics");
+        
+        // Create indexes for better performance
+        createIndexes();
+        
+        // Load cosmetic items from database
+        loadCosmeticItems();
+        
+        getLogger().info("Cosmetics Plugin using dedicated database: cosmetics_plugin");
+    }
+    
+    private void createIndexes() {
+        // Index on item type for faster queries
+        itemsCollection.createIndex(new Document("type", 1));
+        
+        // Index on rarity for faster filtering
+        itemsCollection.createIndex(new Document("rarity", 1));
+        
+        // Compound index for player queries
+        playerCosmeticsCollection.createIndex(
+            new Document("uuid", 1).append("equipped", 1)
+        );
+    }
+    
+    private void loadCosmeticItems() {
+        // Count items
+        long itemCount = itemsCollection.countDocuments();
+        
+        if (itemCount == 0) {
+            getLogger().info("No cosmetic items found. Creating defaults...");
+            createDefaultItems();
+        } else {
+            getLogger().info("Loaded " + itemCount + " cosmetic items");
+        }
+    }
+    
+    private void createDefaultItems() {
+        // Create default cosmetic items
+        List<Document> defaultItems = Arrays.asList(
+            new Document("_id", "party_hat")
+                .append("name", "Party Hat")
+                .append("type", "HAT")
+                .append("rarity", "RARE")
+                .append("price", 1000),
+            
+            new Document("_id", "crown")
+                .append("name", "Royal Crown")
+                .append("type", "HAT")
+                .append("rarity", "LEGENDARY")
+                .append("price", 5000),
+            
+            new Document("_id", "hearts_trail")
+                .append("name", "Hearts Trail")
+                .append("type", "TRAIL")
+                .append("rarity", "UNCOMMON")
+                .append("price", 500)
+        );
+        
+        itemsCollection.insertMany(defaultItems);
+        getLogger().info("Created " + defaultItems.size() + " default items");
+    }
+    
+    // API Methods for your plugin
+    
+    public CompletableFuture<List<Document>> getPlayerCosmetics(UUID playerUUID) {
+        return CompletableFuture.supplyAsync(() -> {
+            Document playerData = playerCosmeticsCollection.find(
+                Filters.eq("_id", playerUUID.toString())
+            ).first();
+            
+            if (playerData == null) {
+                return Collections.emptyList();
+            }
+            
+            return playerData.getList("owned", String.class).stream()
+                .map(itemId -> itemsCollection.find(Filters.eq("_id", itemId)).first())
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+        });
+    }
+    
+    public CompletableFuture<Boolean> purchaseCosmetic(UUID playerUUID, String itemId) {
+        return CompletableFuture.supplyAsync(() -> {
+            // Get item
+            Document item = itemsCollection.find(Filters.eq("_id", itemId)).first();
+            if (item == null) return false;
+            
+            int price = item.getInteger("price", 0);
+            
+            // Check if player can afford it (using NetworkDataAPI player data)
+            Document playerData = api.getPlayerDataService().getPlayerData(playerUUID);
+            int coins = playerData.getInteger("coins", 0);
+            
+            if (coins < price) return false;
+            
+            // Deduct coins
+            api.getPlayerDataService().incrementField(playerUUID, "coins", -price);
+            
+            // Add cosmetic to player
+            playerCosmeticsCollection.updateOne(
+                Filters.eq("_id", playerUUID.toString()),
+                Updates.addToSet("owned", itemId),
+                new UpdateOptions().upsert(true)
+            );
+            
+            return true;
+        });
+    }
+    
+    public CompletableFuture<Void> equipCosmetic(UUID playerUUID, String itemId) {
+        return CompletableFuture.runAsync(() -> {
+            // Get item type
+            Document item = itemsCollection.find(Filters.eq("_id", itemId)).first();
+            if (item == null) return;
+            
+            String type = item.getString("type");
+            
+            // Equip the cosmetic
+            playerCosmeticsCollection.updateOne(
+                Filters.eq("_id", playerUUID.toString()),
+                Updates.set("equipped." + type.toLowerCase(), itemId),
+                new UpdateOptions().upsert(true)
+            );
+        });
+    }
+}
+```
+
+**Benefits of own database per plugin:**
+- ✅ **Complete isolation** - no conflicts possible
+- ✅ **Own backup strategy** per plugin
+- ✅ **Better organization** for large datasets
+- ✅ **Separate monitoring** and performance tuning
+- ✅ **Uses the same connection pool** - efficient!
+- ✅ **No extra configuration** - works out-of-the-box
+
+**Database Management Best Practices:**
+
+```java
+// ❌ WRONG: Creating your own MongoClient
+MongoClient myOwnClient = MongoClients.create("mongodb://localhost:27017");
+// This wastes resources and connections!
+
+// ✅ CORRECT: Use NetworkDataAPI's connection
+MongoDatabase myDB = api.getDatabase("my_plugin");
+// Uses the shared, configured connection pool!
+```
+
+**Example: Guild Plugin with its own database**
+
+```java
+import com.astroid.stijnjakobs.networkdataapi.core.api.APIRegistry;
+import com.astroid.stijnjakobs.networkdataapi.core.api.NetworkDataAPIProvider;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import org.bson.Document;
+import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.UUID;
+
+public class GuildsPlugin extends JavaPlugin {
+    
+    private MongoDatabase guildsDatabase;
+    private MongoCollection<Document> guildsCollection;
+    private MongoCollection<Document> guildMembersCollection;
+    
+    @Override
+    public void onEnable() {
+        NetworkDataAPIProvider api = APIRegistry.getAPI();
+        
+        // Dedicated database for guilds
+        guildsDatabase = api.getDatabase("guilds_plugin");
+        
+        guildsCollection = guildsDatabase.getCollection("guilds");
+        guildMembersCollection = guildsDatabase.getCollection("guild_members");
+        
+        // Create indexes
+        guildsCollection.createIndex(new Document("name", 1));
+        guildsCollection.createIndex(new Document("level", -1));
+        guildMembersCollection.createIndex(new Document("guildId", 1));
+    }
+    
+    public void createGuild(String guildName, UUID ownerUUID) {
+        Document guild = new Document()
+            .append("name", guildName)
+            .append("owner", ownerUUID.toString())
+            .append("level", 1)
+            .append("members", 1)
+            .append("createdAt", System.currentTimeMillis())
+            .append("bankBalance", 0);
+        
+        guildsCollection.insertOne(guild);
+        
+        // Add owner as member
+        Document member = new Document()
+            .append("uuid", ownerUUID.toString())
+            .append("guildId", guild.getObjectId("_id"))
+            .append("rank", "OWNER")
+            .append("joinedAt", System.currentTimeMillis());
+        
+        guildMembersCollection.insertOne(member);
+    }
+}
+```
+
+**Complete example for a Cosmetics Plugin:**
+See `COSMETICS_PLUGIN_EXAMPLE.java` in the repository for a fully working example!
 
 ### Working with Nested Documents
 

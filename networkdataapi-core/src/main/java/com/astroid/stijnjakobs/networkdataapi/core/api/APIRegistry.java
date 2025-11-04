@@ -94,6 +94,11 @@ public class APIRegistry {
         }
 
         @Override
+        public com.mongodb.client.MongoDatabase getDatabase(String databaseName) {
+            return coreManager.getDatabaseManager().getClient().getDatabase(databaseName);
+        }
+
+        @Override
         public String getVersion() {
             return "1.0-SNAPSHOT";
         }

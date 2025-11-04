@@ -78,10 +78,9 @@
                                 </includes>
                             </artifactSet>
                             <relocations>
-                                <relocation>
-                                    <pattern>com.mongodb</pattern>
-                                    <shadedPattern>com.astroid.stijnjakobs.networkdataapi.libs.mongodb</shadedPattern>
-                                </relocation>
+                                <!-- MongoDB is NOT relocated to maintain API compatibility -->
+                                <!-- External plugins can use standard com.mongodb.* imports -->
+
                                 <relocation>
                                     <pattern>com.github.benmanes.caffeine</pattern>
                                     <shadedPattern>com.astroid.stijnjakobs.networkdataapi.libs.caffeine</shadedPattern>
