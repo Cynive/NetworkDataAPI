@@ -2,9 +2,9 @@
 
 > Enterprise-level data synchronization plugin for large Minecraft networks
 
-[![Build](https://github.com/YOUR_USERNAME/NetworkDataAPI/actions/workflows/build-and-release.yml/badge.svg)](https://github.com/YOUR_USERNAME/NetworkDataAPI/actions/workflows/build-and-release.yml)
-[![Maven CI](https://github.com/YOUR_USERNAME/NetworkDataAPI/actions/workflows/maven-ci.yml/badge.svg)](https://github.com/YOUR_USERNAME/NetworkDataAPI/actions/workflows/maven-ci.yml)
-[![CodeQL](https://github.com/YOUR_USERNAME/NetworkDataAPI/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/YOUR_USERNAME/NetworkDataAPI/actions/workflows/codeql-analysis.yml)
+[![Build](https://github.com/astroidmc/NetworkDataAPI/actions/workflows/build-and-release.yml/badge.svg)](https://github.com/YOUR_USERNAME/NetworkDataAPI/actions/workflows/build-and-release.yml)
+[![Maven CI](https://github.com/astroidmc/NetworkDataAPI/actions/workflows/maven-ci.yml/badge.svg)](https://github.com/YOUR_USERNAME/NetworkDataAPI/actions/workflows/maven-ci.yml)
+[![CodeQL](https://github.com/astroidmc/NetworkDataAPI/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/YOUR_USERNAME/NetworkDataAPI/actions/workflows/codeql-analysis.yml)
 [![Java](https://img.shields.io/badge/Java-17+-orange.svg)](https://www.java.com)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Paper%20%7C%20Spigot%20%7C%20BungeeCord-brightgreen.svg)](https://papermc.io)
