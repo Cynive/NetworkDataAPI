@@ -53,6 +53,7 @@
         <mongodb.version>4.11.1</mongodb.version>
         <caffeine.version>3.1.8</caffeine.version>
         <sparkjava.version>2.9.4</sparkjava.version>
+        <jetty.version>9.4.48.v20220622</jetty.version>
         <gson.version>2.10.1</gson.version>
         <slf4j.version>2.0.9</slf4j.version>
         <lombok.version>1.18.30</lombok.version>
@@ -92,6 +93,31 @@
                 <groupId>com.sparkjava</groupId>
                 <artifactId>spark-core</artifactId>
                 <version>${sparkjava.version}</version>
+            </dependency>
+
+            <!-- Jetty Servlet (required by Spark) -->
+            <dependency>
+                <groupId>javax.servlet</groupId>
+                <artifactId>javax.servlet-api</artifactId>
+                <version>3.1.0</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-server</artifactId>
+                <version>${jetty.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-servlet</artifactId>
+                <version>${jetty.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-webapp</artifactId>
+                <version>${jetty.version}</version>
             </dependency>
 
             <!-- Gson -->

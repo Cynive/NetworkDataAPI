@@ -72,6 +72,9 @@
                                     <include>com.sparkjava:*</include>
                                     <include>com.google.code.gson:*</include>
                                     <include>org.slf4j:*</include>
+                                    <include>javax.servlet:*</include>
+                                    <include>org.eclipse.jetty:*</include>
+                                    <include>org.eclipse.jetty.websocket:*</include>
                                 </includes>
                             </artifactSet>
                             <relocations>
@@ -90,6 +93,14 @@
                                 <relocation>
                                     <pattern>com.google.gson</pattern>
                                     <shadedPattern>com.astroid.stijnjakobs.networkdataapi.libs.gson</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.eclipse.jetty</pattern>
+                                    <shadedPattern>com.astroid.stijnjakobs.networkdataapi.libs.jetty</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>javax.servlet</pattern>
+                                    <shadedPattern>com.astroid.stijnjakobs.networkdataapi.libs.servlet</shadedPattern>
                                 </relocation>
                             </relocations>
                         </configuration>

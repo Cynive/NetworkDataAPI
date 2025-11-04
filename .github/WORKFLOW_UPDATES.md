@@ -44,11 +44,39 @@ The workflows will now:
 
 ## Next Steps
 
-1. Commit and push these changes
-2. Verify workflows run successfully on GitHub
+1. ✅ **DONE** - Commit and push these changes
+2. ✅ **DONE** - Verify workflows run successfully on GitHub
+   - Build workflow: ✅ SUCCESS
+   - Auto-release workflow: ✅ SUCCESS (creates "latest" tag and release)
+   - CodeQL workflow: ⚠️ May fail but won't block other workflows
 3. Set up the following GitHub Secrets for Maven publishing:
    - `ASTROIDMC_MAVEN_USERNAME`
    - `ASTROIDMC_MAVEN_PASSWORD`
+
+## Current Status (Latest Run)
+
+✅ **Build Success** - Ubuntu build completed successfully  
+✅ **Auto-release Success** - "latest" tag created and release published  
+✅ **Release Skipped** - Correctly skipped (no version tag)  
+⚠️ **CodeQL Analysis** - May fail but set to continue-on-error  
+
+## How It Works Now
+
+### On Push to main/master:
+1. **Build Job** runs and creates artifacts
+2. **Auto-release Job** creates/updates the "latest" release with JARs
+3. **CodeQL Job** scans code for security issues (won't block on failure)
+
+### On Tagged Push (v1.0.0, v2.0.0, etc.):
+1. **Build Job** runs and creates artifacts
+2. **Release Job** creates a proper GitHub release with version number
+3. **Auto-release Job** is skipped
+
+### Manual Maven Deploy:
+1. Go to Actions tab on GitHub
+2. Select "Publish to AstroidMC Maven" workflow
+3. Click "Run workflow"
+4. JARs will be deployed to your Maven repository
 
 ## Workflow Triggers
 
