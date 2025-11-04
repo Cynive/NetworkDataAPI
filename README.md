@@ -42,7 +42,7 @@ With NetworkDataAPI, all plugins share ONE connection pool:
 - Automatic reconnection for ALL plugins
 - Shared caching layer
 
-**See `GEDEELDE_CONNECTIE_UITLEG.md` (Dutch) or `API_DOCUMENTATION.md` for details!**
+**See `API_DOCUMENTATION.md` for details!**
 
 ## 📋 Requirements
 
@@ -111,22 +111,22 @@ Add the NetworkDataAPI Core library to your plugin's dependencies:
 
 #### Maven
 ```xml
-<dependencies>
-    <dependency>
-        <groupId>com.astroid.stijnjakobs</groupId>
-        <artifactId>networkdataapi-core</artifactId>
-        <version>1.0-SNAPSHOT</version>
-        <scope>provided</scope>
-    </dependency>
-</dependencies>
-
-<!-- Add AstroidMC Maven Repository -->
 <repositories>
-    <repository>
-        <id>astroidmc-public</id>
-        <url>https://maven.astroidmc.com/repository/maven-public/</url>
-    </repository>
+   <repository>
+      <id>astroidmc-releases</id>
+      <name>AstroidMC Maven Releases</name>
+      <url>https://maven.astroidmc.com/repository/maven-public/</url>
+   </repository>
 </repositories>
+
+<dependencies>
+<dependency>
+   <groupId>com.astroid.stijnjakobs</groupId>
+   <artifactId>networkdataapi-core</artifactId>
+   <version>1.0-SNAPSHOT</version>
+   <scope>provided</scope>
+</dependency>
+</dependencies>
 ```
 
 #### Gradle
@@ -229,8 +229,6 @@ Document guild = guilds.find(Filters.eq("name", "Warriors")).first();
 - ✅ Uses shared connection pool (efficient!)
 - ✅ Automatic reconnection
 - ✅ Less resource usage
-
-**See `COSMETICS_PLUGIN_EXAMPLE.java` for a complete working example!**
 
 ### More Examples
 
