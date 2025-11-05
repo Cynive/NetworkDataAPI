@@ -22,7 +22,7 @@ Security vulnerabilities should be reported privately to prevent exploitation.
 3. Fill in the details
 
 ### 3. Or email directly
-Send details to: **security@yourproject.com** (replace with your email)
+Send details to: **security@astroidmc.com**
 
 ### What to include:
 - Description of the vulnerability
@@ -137,7 +137,7 @@ We appreciate security researchers who responsibly disclose vulnerabilities:
 
 For security concerns:
 - GitHub Security Advisories (preferred)
-- Email: security@yourproject.com
+- Email: security@astroidmc.com.com
 
 For general questions:
 - GitHub Issues
