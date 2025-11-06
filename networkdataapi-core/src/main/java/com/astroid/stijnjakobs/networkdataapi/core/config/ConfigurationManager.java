@@ -71,6 +71,26 @@ public class ConfigurationManager {
                   max-connection-idle-time-ms: 60000
                   max-connection-life-time-ms: 600000
                 
+                # Redis Connection Settings
+                redis:
+                  enabled: false
+                  host: "localhost"
+                  port: 6379
+                  password: ""
+                  database: 0
+                  timeout-ms: 2000
+                  # Connection pool settings
+                  max-pool-size: 100
+                  max-idle: 50
+                  min-idle: 10
+                  test-on-borrow: true
+                  test-on-return: false
+                  test-while-idle: true
+                  min-evictable-idle-time-ms: 60000
+                  time-between-eviction-runs-ms: 30000
+                  block-when-exhausted: true
+                  max-wait-ms: 3000
+                
                 # Cache Settings
                 cache:
                   enabled: true

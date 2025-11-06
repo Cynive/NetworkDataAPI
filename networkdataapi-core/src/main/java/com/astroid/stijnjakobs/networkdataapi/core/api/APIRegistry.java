@@ -2,6 +2,8 @@ package com.astroid.stijnjakobs.networkdataapi.core.api;
 
 import com.astroid.stijnjakobs.networkdataapi.core.CoreManager;
 import com.astroid.stijnjakobs.networkdataapi.core.service.PlayerDataService;
+import com.astroid.stijnjakobs.networkdataapi.core.service.RedisDataService;
+import redis.clients.jedis.JedisPool;
 
 /**
  * Public API registry for accessing NetworkDataAPI services.
@@ -106,6 +108,25 @@ public class APIRegistry {
         @Override
         public boolean isHealthy() {
             return coreManager.getDatabaseManager().isHealthy();
+        }
+
+        @Override
+        public RedisDataService getRedisDataService() {
+            return coreManager.getRedisDataService();
+        }
+
+        @Override
+        public JedisPool getRedisPool() {
+            if (coreManager.getRedisManager() == null) {
+                return null;
+            }
+            return coreManager.getRedisManager().getJedisPool();
+        }
+
+        @Override
+        public boolean isRedisEnabled() {
+            return coreManager.getRedisManager() != null &&
+                   coreManager.getRedisManager().isConnected();
         }
     }
 }

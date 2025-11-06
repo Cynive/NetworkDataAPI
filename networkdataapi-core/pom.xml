@@ -23,6 +23,12 @@
             <artifactId>mongodb-driver-sync</artifactId>
         </dependency>
 
+        <!-- Redis (Jedis) -->
+        <dependency>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
+        </dependency>
+
         <!-- Caffeine Cache -->
         <dependency>
             <groupId>com.github.ben-manes.caffeine</groupId>

@@ -52,6 +52,7 @@
 
         <!-- Dependency versions -->
         <mongodb.version>4.11.1</mongodb.version>
+        <redis.version>5.1.0</redis.version>
         <caffeine.version>3.1.8</caffeine.version>
         <sparkjava.version>2.9.4</sparkjava.version>
         <jetty.version>9.4.48.v20220622</jetty.version>
@@ -80,6 +81,13 @@
                 <groupId>org.mongodb</groupId>
                 <artifactId>mongodb-driver-sync</artifactId>
                 <version>${mongodb.version}</version>
+            </dependency>
+
+            <!-- Redis (Jedis) -->
+            <dependency>
+                <groupId>redis.clients</groupId>
+                <artifactId>jedis</artifactId>
+                <version>${redis.version}</version>
             </dependency>
 
             <!-- Caffeine Cache -->

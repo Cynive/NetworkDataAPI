@@ -5,8 +5,10 @@ import com.astroid.stijnjakobs.networkdataapi.core.cache.CacheManager;
 import com.astroid.stijnjakobs.networkdataapi.core.config.ConfigurationManager;
 import com.astroid.stijnjakobs.networkdataapi.core.database.DatabaseManager;
 import com.astroid.stijnjakobs.networkdataapi.core.environment.EnvironmentDetector;
+import com.astroid.stijnjakobs.networkdataapi.core.redis.RedisManager;
 import com.astroid.stijnjakobs.networkdataapi.core.rest.RESTApiService;
 import com.astroid.stijnjakobs.networkdataapi.core.service.PlayerDataService;
+import com.astroid.stijnjakobs.networkdataapi.core.service.RedisDataService;
 import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,9 +46,11 @@ public class CoreManager {
 
     private ConfigurationManager configurationManager;
     private DatabaseManager databaseManager;
+    private RedisManager redisManager;
     private CacheManager cacheManager;
     private AsyncExecutor asyncExecutor;
     private PlayerDataService playerDataService;
+    private RedisDataService redisDataService;
     private RESTApiService restApiService;
 
     private boolean initialized = false;
@@ -90,6 +94,19 @@ public class CoreManager {
             databaseManager = new DatabaseManager(configurationManager);
             databaseManager.connect();
 
+            // Initialize Redis manager (if enabled)
+            if (configurationManager.getBoolean("redis.enabled", false)) {
+                logger.info("Connecting to Redis...");
+                redisManager = new RedisManager(configurationManager);
+                redisManager.connect();
+
+                // Initialize Redis data service
+                logger.info("Initializing Redis data service...");
+                redisDataService = new RedisDataService(redisManager, asyncExecutor);
+            } else {
+                logger.info("Redis is disabled in configuration");
+            }
+
             // Initialize services
             logger.info("Initializing player data service...");
             playerDataService = new PlayerDataService(databaseManager, cacheManager, asyncExecutor);
@@ -132,6 +149,15 @@ public class CoreManager {
                 databaseManager.reconnect();
             }
         }, 1, TimeUnit.MINUTES);
+
+        // Redis health check every minute (if enabled)
+        if (redisManager != null) {
+            asyncExecutor.schedule(() -> {
+                if (!redisManager.isAlive()) {
+                    logger.warn("Redis health check failed");
+                }
+            }, 1, TimeUnit.MINUTES);
+        }
     }
 
     /**
@@ -163,7 +189,16 @@ public class CoreManager {
             try {
                 databaseManager.shutdown();
             } catch (Exception e) {
-                logger.error("Error closing database connection", e);
+                logger.error("Error shutting down database", e);
+            }
+        }
+
+        // Close Redis connection
+        if (redisManager != null) {
+            try {
+                redisManager.shutdown();
+            } catch (Exception e) {
+                logger.error("Error shutting down Redis", e);
             }
         }
 
@@ -187,6 +222,78 @@ public class CoreManager {
      */
     public boolean isInitialized() {
         return initialized;
+    }
+
+    /**
+     * Gets the configuration manager.
+     *
+     * @return the configuration manager
+     */
+    public ConfigurationManager getConfigurationManager() {
+        return configurationManager;
+    }
+
+    /**
+     * Gets the database manager.
+     *
+     * @return the database manager
+     */
+    public DatabaseManager getDatabaseManager() {
+        return databaseManager;
+    }
+
+    /**
+     * Gets the Redis manager.
+     *
+     * @return the Redis manager
+     */
+    public RedisManager getRedisManager() {
+        return redisManager;
+    }
+
+    /**
+     * Gets the cache manager.
+     *
+     * @return the cache manager
+     */
+    public CacheManager getCacheManager() {
+        return cacheManager;
+    }
+
+    /**
+     * Gets the async executor.
+     *
+     * @return the async executor
+     */
+    public AsyncExecutor getAsyncExecutor() {
+        return asyncExecutor;
+    }
+
+    /**
+     * Gets the player data service.
+     *
+     * @return the player data service
+     */
+    public PlayerDataService getPlayerDataService() {
+        return playerDataService;
+    }
+
+    /**
+     * Gets the Redis data service.
+     *
+     * @return the Redis data service
+     */
+    public RedisDataService getRedisDataService() {
+        return redisDataService;
+    }
+
+    /**
+     * Gets the REST API service.
+     *
+     * @return the REST API service
+     */
+    public RESTApiService getRestApiService() {
+        return restApiService;
     }
 }
 

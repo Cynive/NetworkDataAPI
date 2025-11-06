@@ -41,10 +41,8 @@ public class DatabaseManager {
 
     private MongoClient mongoClient;
 
-    @Getter
     private MongoDatabase database;
 
-    @Getter
     private boolean connected = false;
 
     private final ConfigurationManager config;
@@ -56,6 +54,24 @@ public class DatabaseManager {
      */
     public DatabaseManager(ConfigurationManager config) {
         this.config = config;
+    }
+
+    /**
+     * Gets the MongoDB database instance.
+     *
+     * @return the MongoDatabase instance
+     */
+    public MongoDatabase getDatabase() {
+        return database;
+    }
+
+    /**
+     * Checks if the database is connected.
+     *
+     * @return true if connected, false otherwise
+     */
+    public boolean isConnected() {
+        return connected;
     }
 
     /**

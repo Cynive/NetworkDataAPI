@@ -1,7 +1,9 @@
 package com.astroid.stijnjakobs.networkdataapi.core.api;
 
 import com.astroid.stijnjakobs.networkdataapi.core.service.PlayerDataService;
+import com.astroid.stijnjakobs.networkdataapi.core.service.RedisDataService;
 import com.mongodb.client.MongoDatabase;
+import redis.clients.jedis.JedisPool;
 
 /**
  * Public API interface for NetworkDataAPI.
@@ -139,4 +141,76 @@ public interface NetworkDataAPIProvider {
      * @return true if healthy, false otherwise
      */
     boolean isHealthy();
+
+    /**
+     * Gets the Redis data service for caching and messaging.
+     *
+     * <p>The Redis data service provides methods for:</p>
+     * <ul>
+     *   <li>String operations (get, set, with TTL)</li>
+     *   <li>Hash operations (field-value storage)</li>
+     *   <li>Set operations (unique members)</li>
+     *   <li>List operations (ordered data)</li>
+     *   <li>Pub/Sub messaging</li>
+     *   <li>Counter operations</li>
+     * </ul>
+     *
+     * <p><strong>Example - Caching player data:</strong></p>
+     * <pre>{@code
+     * RedisDataService redis = api.getRedisDataService();
+     *
+     * // Cache with 5 minute TTL
+     * redis.setWithExpiry("player:" + uuid, playerData, 300);
+     *
+     * // Retrieve cached data
+     * String data = redis.get("player:" + uuid);
+     * }</pre>
+     *
+     * <p><strong>Example - Pub/Sub messaging:</strong></p>
+     * <pre>{@code
+     * // Publish to other servers
+     * redis.publish("player-join", uuid.toString());
+     * }</pre>
+     *
+     * @return the Redis data service, or null if Redis is disabled
+     */
+    RedisDataService getRedisDataService();
+
+    /**
+     * Gets direct access to the Redis connection pool.
+     *
+     * <p>This allows plugins to use the shared Redis connection pool
+     * for custom operations not covered by RedisDataService.</p>
+     *
+     * <p><strong>Example - Custom Redis operations:</strong></p>
+     * <pre>{@code
+     * JedisPool pool = api.getRedisPool();
+     * try (Jedis jedis = pool.getResource()) {
+     *     // Custom Redis commands
+     *     jedis.zadd("leaderboard", 1000, "player1");
+     *     Set<String> top10 = jedis.zrevrange("leaderboard", 0, 9);
+     * }
+     * }</pre>
+     *
+     * <p><strong>Benefits:</strong></p>
+     * <ul>
+     *   <li>No separate Redis connection needed</li>
+     *   <li>Uses shared connection pool (efficient)</li>
+     *   <li>Automatic reconnection</li>
+     *   <li>Full Jedis API access</li>
+     * </ul>
+     *
+     * <p><strong>Important:</strong> Always use try-with-resources to ensure
+     * connections are returned to the pool!</p>
+     *
+     * @return the Jedis pool, or null if Redis is disabled
+     */
+    JedisPool getRedisPool();
+
+    /**
+     * Checks if Redis is enabled and connected.
+     *
+     * @return true if Redis is available
+     */
+    boolean isRedisEnabled();
 }
