@@ -3,10 +3,18 @@ name: CodeQL Security Scan
 on:
   push:
     branches: [ main, master ]
+    paths:
+      - '**.java'
+      - '**/pom.xml'
+      - '.github/workflows/codeql-analysis.yml'
   pull_request:
     branches: [ main, master ]
+    paths:
+      - '**.java'
+      - '**/pom.xml'
   schedule:
     - cron: '0 0 * * 1'  # Run every Monday at midnight
+  workflow_dispatch:
 
 jobs:
   analyze:

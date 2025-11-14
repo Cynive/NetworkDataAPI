@@ -5,12 +5,22 @@ on:
     branches:
       - main
       - master
+    paths:
+      - '**.java'
+      - '**/pom.xml'
+      - '.github/workflows/build-and-release.yml'
     tags:
       - 'v*'
   pull_request:
     branches:
       - main
       - master
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Reason for manual build'
+        required: false
+        default: 'Manual trigger'
 
 permissions:
   contents: write

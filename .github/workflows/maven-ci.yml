@@ -3,8 +3,18 @@ name: Maven CI
 on:
   push:
     branches: [ main, master, develop ]
+    paths:
+      - '**.java'
+      - '**/pom.xml'
+      - '.github/workflows/maven-ci.yml'
   pull_request:
     branches: [ main, master, develop ]
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Reason for manual build'
+        required: false
+        default: 'Manual trigger'
 
 jobs:
   build:
