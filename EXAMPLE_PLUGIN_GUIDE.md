@@ -2,26 +2,27 @@
 
 ## Overview
 
-The `networkdataapi-example-plugin` module demonstrates how to create a minimal plugin that leverages the NetworkDataAPI shared MongoDB connection to create and manage its own database collections.
+The `networkdataapi-example-plugin` module demonstrates how to create a plugin that leverages NetworkDataAPI's **shared MongoDB connection** to create and manage its own database collections.
+
+**This example shows the CORRECT way to use NetworkDataAPI** - as a database connection layer, not an automatic data manager.
 
 ## What It Demonstrates
 
-This example plugin showcases the following capabilities:
-
 ### 1. **Shared MongoDB Connection**
-   - Uses NetworkDataAPI's existing MongoDB connection
-   - No need to create a separate database connection
-   - Automatically benefits from connection pooling and retry logic
+   - Uses NetworkDataAPI's existing MongoDB connection pool
+   - No need to create a separate database connection in your plugin
+   - Automatically benefits from connection pooling, caching, and retry logic
 
 ### 2. **Isolated Database**
    - Creates its own dedicated MongoDB database (`example_plugin`)
    - Complete data isolation from other plugins
    - No conflicts with other plugin data
+   - Each plugin can have its own database!
 
 ### 3. **Custom Collections**
    - Creates a sample collection (`example_collection`)
-   - Stores documents with fields: `name`, `value`, `timestamp`, `updated`
-   - Demonstrates proper collection initialization
+   - Stores documents with custom fields: `name`, `value`, `timestamp`, `updated`
+   - Demonstrates proper collection initialization and indexing
 
 ### 4. **CRUD Operations**
    - **Create**: Insert new documents

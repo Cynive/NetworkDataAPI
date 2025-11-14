@@ -16,7 +16,26 @@
 
 ## Overview
 
-NetworkDataAPI is an enterprise-grade data synchronization solution for large Minecraft networks (similar to Hypixel or CubeCraft). It provides a unified MongoDB-backed data layer that works seamlessly across both Paper/Spigot servers and BungeeCord/Velocity proxies.
+NetworkDataAPI is an enterprise-grade **MongoDB connection layer** for large Minecraft networks (similar to Hypixel or CubeCraft). It provides a **shared MongoDB connection pool** that all your plugins can use, eliminating the need for each plugin to create its own database connections.
+
+### What NetworkDataAPI Is
+
+**NetworkDataAPI is a DATABASE CONNECTION LAYER**, not a player data manager. It provides:
+
+✅ **Shared MongoDB Connection Pool** - One connection pool for all plugins  
+✅ **High-Level Database API** - Easy-to-use methods for common operations  
+✅ **Automatic Connection Management** - Reconnection, retries, health checks  
+✅ **Built-in Caching** - Reduces database load by 80%+  
+✅ **Thread-Safe Async Operations** - Non-blocking database access  
+✅ **REST API** (Optional) - External integrations  
+
+### What NetworkDataAPI Is NOT
+
+❌ **NOT** an automatic player data tracker  
+❌ **NOT** a statistics/economy/levels system  
+❌ **NOT** a pre-configured player database  
+
+**Your custom plugins decide WHAT data to store and WHEN to store it!**
 
 ### Key Features
 
@@ -158,40 +177,11 @@ environment:
 
 ## API Usage
 
-### Adding NetworkDataAPI as a Dependency
-
-#### In your plugin.yml (Paper/Spigot):
-
-```yaml
-name: YourPlugin
-version: 1.0
-main: com.example.yourplugin.YourPlugin
-depend:
-  - NetworkDataAPI  # Hard dependency
-```
-
-Or use soft dependency:
-
-```yaml
-softdepend:
-  - NetworkDataAPI  # Optional dependency
-```
-
-#### In your bungee.yml (BungeeCord):
-
-```yaml
-name: YourPlugin
-version: 1.0
-main: com.example.yourplugin.YourPlugin
-depends:
-  - NetworkDataAPI
-```
-
 ### Getting the API Instance
 
 ```java
-import api.com.cynive.networkdataapi.core.APIRegistry;
-import api.com.cynive.networkdataapi.core.NetworkDataAPIProvider;
+import com.cynive.networkdataapi.core.api.APIRegistry;
+import com.cynive.networkdataapi.core.api.NetworkDataAPIProvider;
 
 public class YourPlugin extends JavaPlugin {
     
@@ -221,7 +211,238 @@ public class YourPlugin extends JavaPlugin {
 
 ---
 
-## Common Operations
+## 🚀 Quick Start: Creating Your Own Database
+
+**Most common use case:** Each plugin creates its own database/collections.
+
+### Option 1: Dedicated Database per Plugin (RECOMMENDED)
+
+Perfect for: Cosmetics, Economy, Guilds, Stats, Punishments, etc.
+
+```java
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.MongoCollection;
+import org.bson.Document;
+import com.mongodb.client.model.Filters;
+
+public class CosmeticsPlugin extends JavaPlugin {
+    
+    private MongoDatabase database;
+    private MongoCollection<Document> playerCosmetics;
+    
+    @Override
+    public void onEnable() {
+        NetworkDataAPIProvider api = APIRegistry.getAPI();
+        
+        // Get your own database - completely isolated!
+        database = api.getDatabase("cosmetics");
+        
+        // Create your collections
+        playerCosmetics = database.getCollection("player_cosmetics");
+        
+        // Create indexes for performance
+        playerCosmetics.createIndex(
+            com.mongodb.client.model.Indexes.ascending("uuid")
+        );
+    }
+    
+    // Example: Store cosmetic when player claims it
+    public void claimCosmetic(Player player, String cosmeticId) {
+        UUID uuid = player.getUniqueId();
+        
+        // Check if player has data
+        Document data = playerCosmetics.find(
+            Filters.eq("uuid", uuid.toString())
+        ).first();
+        
+        if (data == null) {
+            // First cosmetic - create document
+            data = new Document()
+                .append("uuid", uuid.toString())
+                .append("claimed", List.of(cosmeticId))
+                .append("equipped", cosmeticId);
+            
+            playerCosmetics.insertOne(data);
+        } else {
+            // Add to existing cosmetics
+            playerCosmetics.updateOne(
+                Filters.eq("uuid", uuid.toString()),
+                com.mongodb.client.model.Updates.addToSet("claimed", cosmeticId)
+            );
+        }
+    }
+    
+    // Example: Get player's cosmetics
+    public List<String> getCosmetics(UUID uuid) {
+        Document data = playerCosmetics.find(
+            Filters.eq("uuid", uuid.toString())
+        ).first();
+        
+        if (data == null) {
+            return new ArrayList<>();
+        }
+        
+        return data.getList("claimed", String.class, new ArrayList<>());
+    }
+}
+```
+
+**Example: Economy Plugin**
+
+```java
+public class EconomyPlugin extends JavaPlugin {
+    
+    private MongoDatabase database;
+    private MongoCollection<Document> balances;
+    
+    @Override
+    public void onEnable() {
+        NetworkDataAPIProvider api = APIRegistry.getAPI();
+        
+        // Own database for economy
+        database = api.getDatabase("economy");
+        balances = database.getCollection("player_balances");
+    }
+    
+    public void addCoins(UUID uuid, int amount) {
+        Document data = balances.find(Filters.eq("uuid", uuid.toString())).first();
+        
+        if (data == null) {
+            // First coins - create document
+            balances.insertOne(new Document()
+                .append("uuid", uuid.toString())
+                .append("balance", amount)
+            );
+        } else {
+            // Add to existing balance
+            balances.updateOne(
+                Filters.eq("uuid", uuid.toString()),
+                com.mongodb.client.model.Updates.inc("balance", amount)
+            );
+        }
+    }
+}
+```
+
+**Why this is better:**
+- ✅ **Complete isolation** - no conflicts with other plugins
+- ✅ **Uses shared connection pool** - no extra connections needed
+- ✅ **You control the data structure** - create fields when needed
+- ✅ **No automatic data creation** - data only exists when relevant
+- ✅ **Efficient** - all plugins share NetworkDataAPI's connection pool
+
+### Option 2: Shared Database with Own Collections
+
+```java
+// Use default database from config, but own collections
+MongoDatabase sharedDB = api.getDatabase(); // Default from config
+
+MongoCollection<Document> cosmetics = sharedDB.getCollection("cosmetics");
+MongoCollection<Document> economy = sharedDB.getCollection("economy");
+MongoCollection<Document> stats = sharedDB.getCollection("stats");
+```
+
+**When to use:**
+- ✅ Smaller plugins
+- ✅ Need cross-plugin queries
+- ✅ Simpler setup
+
+---
+
+## Common Operations (Direct MongoDB)
+
+### Insert Document
+
+```java
+Document doc = new Document("uuid", uuid.toString())
+    .append("coins", 1000)
+    .append("level", 5)
+    .append("created", System.currentTimeMillis());
+
+myCollection.insertOne(doc);
+```
+
+### Find Document
+
+```java
+import com.mongodb.client.model.Filters;
+
+Document data = myCollection.find(
+    Filters.eq("uuid", uuid.toString())
+).first();
+
+if (data != null) {
+    int coins = data.getInteger("coins", 0);
+}
+```
+
+### Update Document
+
+```java
+import com.mongodb.client.model.Updates;
+
+myCollection.updateOne(
+    Filters.eq("uuid", uuid.toString()),
+    Updates.set("coins", 2000)
+);
+
+// Multiple fields
+myCollection.updateOne(
+    Filters.eq("uuid", uuid.toString()),
+    Updates.combine(
+        Updates.set("coins", 2000),
+        Updates.set("level", 10)
+    )
+);
+```
+
+### Increment Values
+
+```java
+// Add 100 coins
+myCollection.updateOne(
+    Filters.eq("uuid", uuid.toString()),
+    Updates.inc("coins", 100)
+);
+```
+
+### Delete Document
+
+```java
+myCollection.deleteOne(
+    Filters.eq("uuid", uuid.toString())
+);
+```
+
+### Query Multiple Documents
+
+```java
+// Find all with > 1000 coins
+myCollection.find(Filters.gt("coins", 1000)).forEach(doc -> {
+    System.out.println(doc.getString("uuid"));
+});
+
+// Top 10 richest players
+import com.mongodb.client.model.Sorts;
+
+myCollection.find()
+    .sort(Sorts.descending("coins"))
+    .limit(10)
+    .forEach(doc -> {
+        // Process
+    });
+```
+
+---
+
+## Using PlayerDataService (Optional)
+
+NetworkDataAPI also provides a `PlayerDataService` for **shared player data** between plugins. This is optional - most plugins should use their own databases as shown above!
+
+**Use PlayerDataService when:**
+- You need to share basic player info between plugins
+- You want a simple key-value store for player data
+- You don't need complete database isolation
 
 ### 1. Get Player Data (Async - Recommended)
 
@@ -346,6 +567,113 @@ playerData.deletePlayerDataAsync(player.getUniqueId())
         }
     });
 ```
+
+---
+
+## ⚠️ IMPORTANT: Handling Player Join/Quit Events
+
+**NetworkDataAPI does NOT automatically manage player data!** You must implement your own event listeners in your custom plugins.
+
+### Why No Automatic Player Tracking?
+
+NetworkDataAPI is a **database connection layer**, not a player data management system. This design allows:
+
+- ✅ Multiple plugins to coexist without conflicts
+- ✅ Each plugin to control its own data structure
+- ✅ No unwanted default fields in your database
+- ✅ Complete flexibility in what data to track
+
+### Example: Player Join Listener
+
+```java
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
+
+public class MyPlayerListener implements Listener {
+    
+    private final PlayerDataService playerData;
+    
+    public MyPlayerListener(PlayerDataService playerData) {
+        this.playerData = playerData;
+    }
+    
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        var player = event.getPlayer();
+        UUID uuid = player.getUniqueId();
+        
+        // Load player data asynchronously
+        playerData.getPlayerDataAsync(uuid).thenAccept(data -> {
+            
+            // Initialize default data if this is a new player
+            if (!data.containsKey("myPlugin")) {
+                data.put("myPlugin", new Document()
+                    .append("coins", 0)
+                    .append("level", 1)
+                    .append("firstJoin", System.currentTimeMillis())
+                );
+                playerData.savePlayerDataAsync(uuid, data);
+            }
+            
+            // Update login timestamp
+            playerData.updateFieldAsync(uuid, "lastLogin", System.currentTimeMillis());
+            playerData.updateFieldAsync(uuid, "lastKnownName", player.getName());
+            
+        }).exceptionally(throwable -> {
+            getLogger().error("Failed to load data for player: " + player.getName(), throwable);
+            return null;
+        });
+    }
+}
+```
+
+### Example: Player Quit Listener
+
+```java
+import org.bukkit.event.player.PlayerQuitEvent;
+
+public class MyPlayerListener implements Listener {
+    
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        var player = event.getPlayer();
+        
+        // Update logout timestamp
+        playerData.updateFieldAsync(
+            player.getUniqueId(),
+            "lastLogout",
+            System.currentTimeMillis()
+        ).thenRun(() -> {
+            getLogger().debug("Updated logout time for: " + player.getName());
+        });
+    }
+}
+```
+
+### Registering Your Listener
+
+```java
+public class YourPlugin extends JavaPlugin {
+    
+    @Override
+    public void onEnable() {
+        NetworkDataAPIProvider api = APIRegistry.getAPI();
+        PlayerDataService playerData = api.getPlayerDataService();
+        
+        // Register your listener
+        getServer().getPluginManager().registerEvents(
+            new MyPlayerListener(playerData),
+            this
+        );
+    }
+}
+```
+
+### Reference Implementation
+
+Check out `PlayerConnectionListener.java` in the NetworkDataAPI source code for a complete reference implementation that you can copy and adapt for your needs!
 
 ---
 

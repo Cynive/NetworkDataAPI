@@ -122,7 +122,8 @@ public class PlayerDataService {
                 .first();
 
         if (data == null) {
-            data = createDefaultPlayerData(uuid);
+            // Return empty document - plugins create their own data!
+            data = new Document("_id", uuid.toString());
         }
 
         // Cache the result
@@ -377,21 +378,6 @@ public class PlayerDataService {
      */
     public CompletableFuture<List<Document>> queryAsync(Bson filter, int limit) {
         return asyncExecutor.supply(() -> query(filter, limit));
-    }
-
-    /**
-     * Creates default player data for a new player.
-     *
-     * @param uuid the player UUID
-     * @return a new document with default values
-     */
-    private Document createDefaultPlayerData(UUID uuid) {
-        return new Document("_id", uuid.toString())
-                .append("firstJoin", System.currentTimeMillis())
-                .append("lastUpdated", System.currentTimeMillis())
-                .append("coins", 0)
-                .append("level", 1)
-                .append("experience", 0);
     }
 }
 
