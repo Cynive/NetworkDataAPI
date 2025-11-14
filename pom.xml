@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.astroid.stijnjakobs</groupId>
+    <groupId>com.cynive</groupId>
     <artifactId>NetworkDataAPI-parent</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
@@ -25,9 +25,9 @@
         <developer>
             <id>stijnjakobs</id>
             <name>Stijn Jakobs</name>
-            <email>stijn@astroidmc.com</email>
-            <organization>AstroidMC</organization>
-            <organizationUrl>https://astroidmc.com</organizationUrl>
+            <email>stijn@cynive.com</email>
+            <organization>Cynive</organization>
+            <organizationUrl>https://cynive.com</organizationUrl>
         </developer>
     </developers>
 
@@ -194,14 +194,14 @@
 
     <distributionManagement>
         <repository>
-            <id>astroidmc-releases</id>
-            <name>AstroidMC Maven Releases</name>
-            <url>https://maven.astroidmc.com/repository/maven-releases/</url>
+            <id>cynive-releases</id>
+            <name>Cynive Maven Releases</name>
+            <url>https://cdn.ordnary.com/repository/maven-releases/</url>
         </repository>
         <snapshotRepository>
-            <id>astroidmc-snapshots</id>
-            <name>AstroidMC Maven Snapshots</name>
-            <url>https://maven.astroidmc.com/repository/maven-snapshots/</url>
+            <id>cynive-snapshots</id>
+            <name>Cynive Maven Snapshots</name>
+            <url>https://cdn.ordnary.com/repository/maven-snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
 

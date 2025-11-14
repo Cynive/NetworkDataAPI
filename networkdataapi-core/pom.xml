@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.astroid.stijnjakobs</groupId>
+        <groupId>com.cynive</groupId>
         <artifactId>NetworkDataAPI-parent</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
@@ -106,6 +106,10 @@
                         <goals>
                             <goal>jar</goal>
                         </goals>
+                        <configuration>
+                            <!-- Skip javadoc during deploy phase (too large for repo) -->
+                            <skip>${maven.javadoc.skip}</skip>
+                        </configuration>
                     </execution>
                 </executions>
                 <configuration>
@@ -121,5 +125,10 @@
             </plugin>
         </plugins>
     </build>
+
+    <properties>
+        <!-- Skip javadoc deployment by default (too large for repo) -->
+        <maven.javadoc.skip>true</maven.javadoc.skip>
+    </properties>
 </project>
 

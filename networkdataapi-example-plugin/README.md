@@ -94,7 +94,7 @@ For optimal query performance, the following indexes are created:
 ## Code Structure
 
 ```
-com.astroid.stijnjakobs.networkdataapi.example/
+com.cynive.networkdataapi.example/
 ├── ExamplePlugin.java          # Main plugin class
 ├── ExampleDataManager.java     # MongoDB operations handler
 └── ExampleCommand.java         # Command handler

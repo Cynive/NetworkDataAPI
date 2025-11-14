@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.astroid.stijnjakobs</groupId>
+        <groupId>com.cynive</groupId>
         <artifactId>NetworkDataAPI-parent</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
@@ -19,7 +19,7 @@
     <dependencies>
         <!-- Core Module -->
         <dependency>
-            <groupId>com.astroid.stijnjakobs</groupId>
+            <groupId>com.cynive</groupId>
             <artifactId>networkdataapi-core</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -66,7 +66,7 @@
                         <configuration>
                             <artifactSet>
                                 <includes>
-                                    <include>com.astroid.stijnjakobs:networkdataapi-core</include>
+                                    <include>com.cynive:networkdataapi-core</include>
                                     <include>org.mongodb:*</include>
                                     <include>com.github.ben-manes.caffeine:*</include>
                                     <include>com.sparkjava:*</include>
@@ -83,23 +83,23 @@
 
                                 <relocation>
                                     <pattern>com.github.benmanes.caffeine</pattern>
-                                    <shadedPattern>com.astroid.stijnjakobs.networkdataapi.libs.caffeine</shadedPattern>
+                                    <shadedPattern>com.cynive.networkdataapi.libs.caffeine</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>spark</pattern>
-                                    <shadedPattern>com.astroid.stijnjakobs.networkdataapi.libs.spark</shadedPattern>
+                                    <shadedPattern>com.cynive.networkdataapi.libs.spark</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>com.google.gson</pattern>
-                                    <shadedPattern>com.astroid.stijnjakobs.networkdataapi.libs.gson</shadedPattern>
+                                    <shadedPattern>com.cynive.networkdataapi.libs.gson</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>org.eclipse.jetty</pattern>
-                                    <shadedPattern>com.astroid.stijnjakobs.networkdataapi.libs.jetty</shadedPattern>
+                                    <shadedPattern>com.cynive.networkdataapi.libs.jetty</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>javax.servlet</pattern>
-                                    <shadedPattern>com.astroid.stijnjakobs.networkdataapi.libs.servlet</shadedPattern>
+                                    <shadedPattern>com.cynive.networkdataapi.libs.servlet</shadedPattern>
                                 </relocation>
                             </relocations>
                         </configuration>

@@ -109,15 +109,15 @@ Add the NetworkDataAPI Core library to your plugin's dependencies:
 ```xml
 <repositories>
    <repository>
-      <id>astroidmc-releases</id>
-      <name>AstroidMC Maven Releases</name>
-      <url>https://maven.astroidmc.com/repository/maven-public/</url>
+      <id>cynive-snapshots</id>
+      <name>Cynive Maven Snapshots</name>
+      <url>https://cdn.ordnary.com/repository/maven-snapshots/</url>
    </repository>
 </repositories>
 
 <dependencies>
    <dependency>
-      <groupId>com.astroid.stijnjakobs</groupId>
+      <groupId>com.cynive</groupId>
       <artifactId>networkdataapi-core</artifactId>
       <version>1.0-SNAPSHOT</version>
       <scope>provided</scope>
@@ -129,12 +129,12 @@ Add the NetworkDataAPI Core library to your plugin's dependencies:
 ```gradle
 repositories {
     maven {
-        url = uri("https://maven.astroidmc.com/repository/maven-public/")
+        url = uri("https://cdn.ordnary.com/repository/maven-snapshots/")
     }
 }
 
 dependencies {
-    compileOnly 'com.astroid.stijnjakobs:networkdataapi-core:1.0-SNAPSHOT'
+    compileOnly 'com.cynive:networkdataapi-core:1.0-SNAPSHOT'
 }
 ```
 
