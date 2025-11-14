@@ -11,7 +11,7 @@
 
 ## 🚀 Overview
 
-NetworkDataAPI is a production-grade, enterprise-level data synchronization solution designed for large Minecraft networks (similar to Hypixel or CubeCraft). It provides a unified MongoDB-backed data layer that works seamlessly across both Paper/Spigot servers and BungeeCord/Velocity proxies.
+NetworkDataAPI is a production-grade, enterprise-level **MongoDB connection layer** designed for large Minecraft networks (similar to Hypixel or CubeCraft). It provides a **shared MongoDB connection pool** that all your plugins can use, eliminating the need for each plugin to create its own database connections.
 
 ### ✨ Key Features
 
@@ -25,22 +25,115 @@ NetworkDataAPI is a production-grade, enterprise-level data synchronization solu
 - **📚 Well Documented**: Comprehensive JavaDoc and developer documentation
 - **🏗️ Clean Architecture**: SOLID principles with dependency injection and service patterns
 
+### 🎯 What NetworkDataAPI Does (and Doesn't Do)
+
+**✅ What it DOES:**
+- Provides a **shared MongoDB connection pool** for all plugins on a server
+- Offers a **high-level API** for database operations (insert, query, update, delete)
+- Handles **automatic reconnection** and connection health monitoring
+- Provides **caching** to reduce database load (80%+ reduction)
+- Offers **async operations** to prevent server lag
+
+**❌ What it DOESN'T Do:**
+- Does **NOT** automatically manage player data
+- Does **NOT** automatically track player joins/quits
+- Does **NOT** create any default collections or documents
+- Does **NOT** decide what data your plugins store
+
+**NetworkDataAPI is ONLY a database connection layer!**
+
+### 💡 Real-World Use Case
+
+**Scenario:** You have a network with 5 servers
+
+**Without NetworkDataAPI:**
+```java
+// In your Cosmetics Plugin
+MongoClient client = new MongoClient("mongodb://...");  // 10 connections
+MongoDatabase db = client.getDatabase("cosmetics");
+// ... cosmetics logic
+
+// In your Economy Plugin  
+MongoClient client = new MongoClient("mongodb://...");  // Another 10 connections!
+MongoDatabase db = client.getDatabase("economy");
+// ... economy logic
+
+// Each plugin opens its own connections = connection spam!
+```
+
+**With NetworkDataAPI:**
+```java
+// In your Cosmetics Plugin
+NetworkDataAPIProvider api = APIRegistry.getAPI();
+MongoDatabase db = api.getDatabase("cosmetics");  // Uses shared pool!
+MongoCollection<Document> cosmetics = db.getCollection("player_cosmetics");
+// ... cosmetics logic
+
+// In your Economy Plugin
+NetworkDataAPIProvider api = APIRegistry.getAPI();
+MongoDatabase db = api.getDatabase("economy");  // Uses the same shared pool!
+MongoCollection<Document> balances = db.getCollection("player_balances");
+// ... economy logic
+
+// Both plugins share 1 connection pool = efficient!
+```
+
+**Each plugin creates its own data when needed:**
+- Cosmetics plugin creates cosmetic data when a player claims a cosmetic
+- Economy plugin creates balance data when a player earns coins
+- Stats plugin creates stats data when a player gets a kill
+- **NetworkDataAPI creates NOTHING automatically!**
+
 ## 🎯 Why Use This?
 
-### The Problem
-Without NetworkDataAPI, each plugin creates its own database connection:
-- Cosmetics Plugin: 10 connections
-- Economy Plugin: 10 connections  
-- Stats Plugin: 10 connections
-- **Total: 30+ database connections!** 😱
+### The Problem: Connection Overload
+Without NetworkDataAPI, **each plugin** creates its own database connections:
 
-### The Solution  
-With NetworkDataAPI, all plugins share ONE connection pool:
-- **All Plugins → NetworkDataAPI → Max 100 shared connections** 🚀
-- Less RAM usage
-- Better performance
-- Automatic reconnection for ALL plugins
-- Shared caching layer
+```
+Server with 3 plugins (each with connection pool of 10):
+├─ Cosmetics Plugin → 10 MongoDB connections
+├─ Economy Plugin   → 10 MongoDB connections  
+└─ Stats Plugin     → 10 MongoDB connections
+   TOTAL: 30 database connections per server! 😱
+
+With 5 servers in your network = 150 connections!
+```
+
+### The Solution: Shared Connection Pool
+With NetworkDataAPI, **all plugins** share one connection pool:
+
+```
+Server with 3 plugins via NetworkDataAPI:
+└─ NetworkDataAPI → 1 shared connection pool (max 100 connections)
+   ├─ Cosmetics Plugin → uses shared pool
+   ├─ Economy Plugin   → uses shared pool
+   └─ Stats Plugin     → uses shared pool
+   TOTAL: Max 100 connections, shared by all plugins! 🚀
+
+With 5 servers in your network = Max 500 connections (vs 750!)
+```
+
+**Benefits:**
+- ✅ Less RAM usage
+- ✅ Better performance  
+- ✅ Automatic reconnection for ALL plugins
+- ✅ Shared caching layer
+- ✅ Each plugin creates its own data (cosmetics, economy, stats, etc.)
+
+### How it works
+
+**NetworkDataAPI does:**
+- Opens 1 MongoDB connection pool
+- Provides API for database operations
+- Handles caching & reconnection
+
+**Your plugins do:**
+- **Cosmetics Plugin**: Creates `claimed_cosmetics` collection with cosmetic data
+- **Economy Plugin**: Creates `player_money` collection with balance data  
+- **Stats Plugin**: Creates `player_stats` collection with kills/deaths/etc
+- Each plugin decides WHAT data, WHEN to save, HOW to structure
+
+**No default player data!** NetworkDataAPI creates NOTHING automatically.
 
 **See `API_DOCUMENTATION.md` for details!**
 
@@ -193,6 +286,56 @@ public class YourPlugin extends JavaPlugin {
     }
 }
 ```
+
+### ⚠️ Important: Player Event Handling
+
+**NetworkDataAPI does NOT automatically track player joins/quits or create default player data.** You must handle this in your custom plugins!
+
+#### Example: Handling Player Joins in Your Plugin
+
+```java
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
+
+public class MyPlayerListener implements Listener {
+    
+    private final PlayerDataService playerData;
+    
+    public MyPlayerListener(PlayerDataService playerData) {
+        this.playerData = playerData;
+    }
+    
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        UUID uuid = event.getPlayer().getUniqueId();
+        
+        // Load/create player data for YOUR plugin
+        playerData.getPlayerDataAsync(uuid).thenAccept(data -> {
+            // Handle player data - set defaults if needed
+            if (!data.containsKey("myPluginData")) {
+                data.put("myPluginData", new Document()
+                    .append("coins", 0)
+                    .append("level", 1)
+                    .append("firstJoin", System.currentTimeMillis())
+                );
+                playerData.savePlayerDataAsync(uuid, data);
+            }
+            
+            // Update last login
+            playerData.updateFieldAsync(uuid, "lastLogin", System.currentTimeMillis());
+        });
+    }
+}
+```
+
+**Why this design?**
+- ✅ Each plugin controls its own data
+- ✅ No unwanted default fields created
+- ✅ Multiple plugins can coexist without conflicts
+- ✅ You decide WHAT data to store and WHEN
+
+See `PlayerConnectionListener.java` in the source code for a complete reference implementation!
 
 ### Using for Your Own Data (Custom Collections)
 

@@ -46,8 +46,6 @@ public final class NetworkDataAPI extends JavaPlugin {
             // Register API
             APIRegistry.register(coreManager);
 
-            // Register event listeners
-            registerListeners();
 
             // Register commands
             registerCommands();
@@ -74,16 +72,6 @@ public final class NetworkDataAPI extends JavaPlugin {
         }
 
         getLogger().info("NetworkDataAPI has been disabled.");
-    }
-
-    /**
-     * Registers event listeners for automatic data management.
-     */
-    private void registerListeners() {
-        getServer().getPluginManager().registerEvents(
-                new PlayerConnectionListener(coreManager.getPlayerDataService()),
-                this
-        );
     }
 
     /**

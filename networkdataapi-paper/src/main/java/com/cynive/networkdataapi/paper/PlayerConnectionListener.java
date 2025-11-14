@@ -10,14 +10,30 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Listener for player connection events to manage data loading and saving.
+ * EXAMPLE listener for player connection events to manage data loading and saving.
  *
- * <p>This listener automatically:</p>
+ * <p><strong>IMPORTANT:</strong> This listener is NOT automatically registered by NetworkDataAPI.
+ * It serves as an example implementation for custom plugins that want to manage player data.</p>
+ *
+ * <p>NetworkDataAPI is a database connection layer only. Custom plugins should implement
+ * their own listeners if they need to track player joins/quits.</p>
+ *
+ * <p>This example listener demonstrates how to:</p>
  * <ul>
- *   <li>Loads player data when they join the server</li>
- *   <li>Updates last login timestamp</li>
- *   <li>Pre-caches player data for instant access</li>
+ *   <li>Load player data when they join the server</li>
+ *   <li>Update last login timestamp</li>
+ *   <li>Pre-cache player data for instant access</li>
  * </ul>
+ *
+ * <p><strong>Usage in your custom plugin:</strong></p>
+ * <pre>{@code
+ * NetworkDataAPIProvider api = APIRegistry.getAPI();
+ * PlayerDataService playerDataService = api.getPlayerDataService();
+ * getServer().getPluginManager().registerEvents(
+ *     new PlayerConnectionListener(playerDataService),
+ *     this
+ * );
+ * }</pre>
  *
  * @author Stijn Jakobs
  * @version 1.0
