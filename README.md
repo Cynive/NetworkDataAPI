@@ -84,10 +84,6 @@ mongodb:
 
 **Windows:**
 ```bash
-# Use the provided build script
-build.bat
-
-# Or use Maven directly
 mvn clean package
 ```
 
