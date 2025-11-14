@@ -1,6 +1,6 @@
 name: NetworkDataAPI
 version: ${project.version}
-main: com.astroid.stijnjakobs.networkdataapi.bungee.NetworkDataAPI
+main: com.cynive.networkdataapi.bungee.NetworkDataAPI
 author: Stijn Jakobs
 description: Enterprise-level data synchronization plugin for Minecraft networks
 

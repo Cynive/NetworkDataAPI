@@ -161,9 +161,9 @@ depends:
 ### Basic Usage
 
 ```java
-import com.astroid.stijnjakobs.networkdataapi.core.api.APIRegistry;
-import com.astroid.stijnjakobs.networkdataapi.core.api.NetworkDataAPIProvider;
-import com.astroid.stijnjakobs.networkdataapi.core.service.PlayerDataService;
+import api.com.cynive.networkdataapi.core.APIRegistry;
+import api.com.cynive.networkdataapi.core.NetworkDataAPIProvider;
+import service.com.cynive.networkdataapi.core.PlayerDataService;
 
 public class YourPlugin extends JavaPlugin {
     

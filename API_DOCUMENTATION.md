@@ -190,8 +190,8 @@ depends:
 ### Getting the API Instance
 
 ```java
-import com.astroid.stijnjakobs.networkdataapi.core.api.APIRegistry;
-import com.astroid.stijnjakobs.networkdataapi.core.api.NetworkDataAPIProvider;
+import api.com.cynive.networkdataapi.core.APIRegistry;
+import api.com.cynive.networkdataapi.core.NetworkDataAPIProvider;
 
 public class YourPlugin extends JavaPlugin {
     
@@ -226,7 +226,7 @@ public class YourPlugin extends JavaPlugin {
 ### 1. Get Player Data (Async - Recommended)
 
 ```java
-import com.astroid.stijnjakobs.networkdataapi.core.service.PlayerDataService;
+import service.com.cynive.networkdataapi.core.PlayerDataService;
 import org.bson.Document;
 
 PlayerDataService playerData = api.getPlayerDataService();
@@ -461,8 +461,8 @@ items.insertOne(new Document("name", "Crown").append("price", 5000));
 **Complete example: Cosmetics Plugin with its own database**
 
 ```java
-import com.astroid.stijnjakobs.networkdataapi.core.api.APIRegistry;
-import com.astroid.stijnjakobs.networkdataapi.core.api.NetworkDataAPIProvider;
+import api.com.cynive.networkdataapi.core.APIRegistry;
+import api.com.cynive.networkdataapi.core.NetworkDataAPIProvider;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
@@ -643,8 +643,8 @@ MongoDatabase myDB = api.getDatabase("my_plugin");
 **Example: Guild Plugin with its own database**
 
 ```java
-import com.astroid.stijnjakobs.networkdataapi.core.api.APIRegistry;
-import com.astroid.stijnjakobs.networkdataapi.core.api.NetworkDataAPIProvider;
+import api.com.cynive.networkdataapi.core.APIRegistry;
+import api.com.cynive.networkdataapi.core.NetworkDataAPIProvider;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;

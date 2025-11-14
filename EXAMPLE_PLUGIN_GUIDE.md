@@ -162,8 +162,8 @@ networkdataapi-example-plugin/target/NetworkDataAPI-Example-1.0-SNAPSHOT.jar
 
 ### 1. How to Get the NetworkDataAPI Instance
 ```java
-import com.astroid.stijnjakobs.networkdataapi.core.api.APIRegistry;
-import com.astroid.stijnjakobs.networkdataapi.core.api.NetworkDataAPIProvider;
+import api.com.cynive.networkdataapi.core.APIRegistry;
+import api.com.cynive.networkdataapi.core.NetworkDataAPIProvider;
 
 // In your plugin's onEnable()
 if (!APIRegistry.isAvailable()) {

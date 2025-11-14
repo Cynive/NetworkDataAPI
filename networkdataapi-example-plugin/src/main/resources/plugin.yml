@@ -1,6 +1,6 @@
 name: NetworkDataAPI-Example
 version: ${project.version}
-main: com.astroid.stijnjakobs.networkdataapi.example.ExamplePlugin
+main: com.cynive.networkdataapi.example.ExamplePlugin
 api-version: 1.20
 author: Stijn Jakobs
 description: Example plugin demonstrating NetworkDataAPI usage with custom MongoDB collections
